@@ -1,0 +1,16 @@
+{
+  "name": "chay-aur-backend",
+  "version": "1.0.0",
+  "description": "\"a backend project while learning backend\"",
+  "keywords": [
+    "javascript",
+    "backend"
+  ],
+  "license": "ISC",
+  "author": "Ankit Singh",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
