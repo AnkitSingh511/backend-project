@@ -20,29 +20,32 @@ const registerUser = asyncHandler(async (req,res) => {
  
  if([fullName,email,username,password].some((field) => field?.trim() === "")
  ) {
-throw new ApiError(400,"All fields are required")
+  throw new ApiError(400,"All fields are required")
  }
-const existedUser = User.findOne({
-   $or:[{username},{email}]//$or is a MongoDb operator that means: return a document if at least one of the document is true
-})//checks whether a user with the given username or database already exists in the database
+//checks whether a user with the given username or database already exists in the database
+const existedUser = await User.findOne({
+    $or: [{ username }, { email }]
+});
 if(existedUser) {
    throw new ApiError(409,"User with email or username already exist")
 }
-const avatarLocalPath = req.files?.avatar[0]?.path;//uploaded files by client is stored in req.files
+// console.log(req.files);
+// console.log(req.body);
+const avatarLocalPath = req.files?.avatar?.[0]?.path;//uploaded files by client is stored in req.files
 //The ?. is optional chaining.
 // It means:
 // If req.files exists, access .avatar; otherwise return undefined.
-const coverImageLocalPath = req.files?.coverImage[0]?.path;
+const coverImageLocalPath = req.files?.coverImage?.[0]?.path;
 if(!avatarLocalPath){
-   throw new ApiError(400,"Avatar file is required")
+   throw new ApiError(400,"Failed to upload file on cloudinary")
 }
 const avatar = await uploadOnCloudinary(avatarLocalPath)
 const coverImage = await uploadOnCloudinary(coverImageLocalPath)
 if(!avatar){
-   throw new ApiError(400,"Avatar file is required")
+   throw new ApiError(400,"Failed to upload file on cloudinary")
 }
 const user = await User.create({
-   fullname,
+   fullName,
    avatar:avatar.url,
    coverImage: coverImage?.url || "",
    email,

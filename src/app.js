@@ -33,3 +33,17 @@ import userRouter from './routes/user.routes.js'
 //routes declaration
 app.use("/api/v1/users",userRouter)
 // http://localhostf:8000/api/v1/users/register
+
+import multer from "multer";
+
+app.use((err, req, res, next) => {
+    if (err instanceof multer.MulterError) {
+        console.log("Multer Error:", err);
+        return res.status(400).json({
+            message: err.message,
+            field: err.field
+        });
+    }
+
+    next(err);
+});
