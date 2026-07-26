@@ -4,7 +4,7 @@ import { User } from "../models/user.model.js";
 import {uploadOnCloudinary} from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
-import { useSyncExternalStore } from "react";
+// import { useSyncExternalStore } from "react";
 import mongoose from "mongoose";
 
 const generateAccessAndRefreshTokens = async(userId) => {
@@ -134,8 +134,8 @@ const logoutUser = asyncHandler(async(req,res) => {
   await User.findByIdAndUpdate(
    req.user._id,
    {
-      $set: {
-         refreshToken: undefinded
+      $unset: {
+         refreshToken: 1
       }
       },
       {
@@ -154,7 +154,9 @@ const logoutUser = asyncHandler(async(req,res) => {
 })
 const refreshAccessToken = asyncHandler(async(req,res)=>
 {
-   const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken
+   console.log("req.cookies:", req.cookies);
+    console.log("req.body:", req.body);
+   const incomingRefreshToken = req.cookies?.refreshToken || req.body?.refreshToken
 
    if(!incomingRefreshToken) {
       throw new ApiError(401,"unauthorized request")
@@ -318,12 +320,45 @@ const getUserChannelProfile = asyncHandler(async(req,res) => {
                }
             },
             {
+            $addFields: {
+    subscribersCount: {
+      $size: "$subscribers"
+    },
+    channelsSubscribedToCount: {
+      $size: "$subscribedTo"
+    },
+    isSubscribed: {
+      $cond: {
+        if: {
+          $in: [req.user?._id, "$subscribers.subscriber"]
+        },
+        then: true,
+        else: false
+      }
+    }
+   }
+},
+
+
+{
+  $project: {
+    fullName: 1,
+    username: 1,
+    subscribersCount: 1,
+    channelsSubscribedToCount: 1,
+    isSubscribed: 1,
+    avatar: 1,
+    coverImage: 1,
+    email: 1
+  }
+},
+            {
                $project:{
                   fullName: 1,
                   username:1,
                   subscribersCount:1,
-                  channelsSubscibedToCount: 1,
-                  isSubscibed: 1,
+                  channelsSubscribedToCount: 1,
+                  isSubscribed: 1,
                   avatar: 1,
                   coverImage:1,
                   email:1
